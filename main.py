@@ -16,7 +16,7 @@ except ImportError:
     Dijkstra = None
     pass
 
-CURRENT_LANGUAGE = "English"  # Default language
+CURRENT_LANGUAGE = "English"  
 
 TRANSLATIONS = {
     "English": {
@@ -123,19 +123,16 @@ COLOR_LOSE = (200, 50, 50)
 COLOR_WIN = (50, 200, 50)
 COLOR_OVERLAY = (0, 0, 0, 180)
 
-# --- GLOBAL VARS ---
 window = None
 canvas = None
 scale_ratio = 1.0
-current_nav_bar = None  # Store navigation bar for drawing on every frame
-current_mouse_pos = (0, 0)  # Store mouse position for nav bar drawing
+current_nav_bar = None  
+current_mouse_pos = (0, 0)  
 
-# --- DISPLAY HOOK ---
 _orig_flip = pygame.display.flip
 def _smart_flip():
     global current_nav_bar, current_mouse_pos
     if window and canvas:
-        # Draw navigation bar before flipping if it exists
         if current_nav_bar:
             current_nav_bar.draw(canvas, current_mouse_pos)
         
@@ -311,7 +308,6 @@ class NavigationBar:
         self.button_spacing = 5
         self.game_width = game_width
         
-        # Calculate button positions (centered at top)
         total_width = (self.button_width * 4) + (self.button_spacing * 3)
         start_x = (game_width - total_width) // 2
         
@@ -326,7 +322,6 @@ class NavigationBar:
         pygame.draw.rect(surface, (40, 40, 40), pygame.Rect(0, 0, self.game_width, self.bar_height))
         pygame.draw.line(surface, (100, 100, 100), (0, self.bar_height), (self.game_width, self.bar_height), 2)
         
-        # Draw buttons
         save_hover = self.save_btn.collidepoint(mouse_pos)
         undo_hover = self.undo_btn.collidepoint(mouse_pos)
         reset_hover = self.reset_btn.collidepoint(mouse_pos)
@@ -499,14 +494,12 @@ class MazeGenerator:
             attempts += 1
             if attempts % 10 == 0: print(f"Searching for winnable map... Attempt {attempts}")
             
-            # 1. Generate Structural Map (guaranteed connectivity)
             data = generate_solvable_data(self.cols, self.rows)
             
             # 2. Convert to Game Grid
             self.grid = self._convert_to_grid(data)
             
-            # 3. Try to place Mummy and Validate with AI
-            # Try a few different mummy positions for this map layout
+     
             found_solution = False
             for _ in range(5):
                 if self._spawn_mummy(data):
@@ -614,15 +607,13 @@ def login_menu():
     password = ""
     is_registering = False
     message = ""
-    active_field = None  # None, "username" or "password" - only set when clicked
-    show_password = [False]  # Use list to make it mutable and persistent across frames
+    active_field = None  
+    show_password = [False]  
     clock = pygame.time.Clock()
     cursor_visible = True
     cursor_timer = 0
-    cursor_blink_interval = 500  # milliseconds
-    
+    cursor_blink_interval = 500 
     while True:
-        # Update cursor blinking
         cursor_timer += clock.tick(60)  # 60 FPS
         if cursor_timer >= cursor_blink_interval:
             cursor_visible = not cursor_visible
@@ -665,13 +656,11 @@ def login_menu():
                 else:
                     username_display = " "
         else:
-            # Field is not active, show placeholder if empty
             username_display = username if username else t("enter_username")
         
         draw_text(canvas, username_display, 18, username_rect.centerx, username_rect.centery, 
                  (200, 200, 200) if username or active_field == "username" else (100, 100, 100))
         
-        # Password field with eye icon
         draw_text(canvas, t("password"), 18, GAME_W//2 - 120, 220)
         password_rect = pygame.Rect(GAME_W//2 - 100, 240, 200, 35)
         password_color = (120, 120, 120) if active_field == "password" else COLOR_BTN
@@ -689,10 +678,8 @@ def login_menu():
         
         # Draw eye icon using shapes
         if show_password[0]:
-            # Open eye - show password
             draw_eye_open(canvas, eye_icon_rect.centerx, eye_icon_rect.centery, size=7)
         else:
-            # Closed eye - hide password
             draw_eye_closed(canvas, eye_icon_rect.centerx, eye_icon_rect.centery, size=7)
         
         # Draw password with cursor if active and field has been clicked
