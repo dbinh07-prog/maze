@@ -77,7 +77,6 @@ class gate_spritesheet:
     def __init__(self, image_spritesheet_path):
         self.sheet = pygame.image.load(image_spritesheet_path)
         self.rect = self.sheet.get_rect()
-        # 8 is number of sheet in image
         w = self.rect.width / 8
         h = self.rect.height
         self.cells = []
@@ -102,7 +101,6 @@ class stairs_spritesheet:
         self.rect = self.sheet.get_rect()
         self.cell_w = self.rect.width // 4
         self.cell_h = self.rect.height
-        # Stair is UP, RIGHT, DOWN, LEFT = (0, 1, 2, 3) in list stairs
         self.stairs = []
         for x in range(4):
             self.stairs.append([x * self.cell_w, 0, self.cell_w, self.cell_h])
@@ -110,29 +108,23 @@ class stairs_spritesheet:
     def draw(self, surface, x, y, cellIndex):
         surface.blit(self.sheet, (x, y), self.stairs[cellIndex])
 
-# Mở file graphics.py và thay thế toàn bộ hàm draw_screen cũ bằng hàm này:
 
 def draw_screen(screen, input_maze, backdrop, floor, maze_size, cell_rect, stair, stair_position, trap, trap_position,
                 key, key_position, gate_sheet, gate, wall, explorer, mummy_white, mummy_red, scorpion_white, scorpion_red):
     coordinate_X = 67
     coordinate_Y = 80
-    # DRAW BACKDROP AND FLOOR
     screen.blit(backdrop, (0, 0))
     screen.blit(floor, (coordinate_X, coordinate_Y))
 
-    # DRAW STAIR
     stair_px = stair_position[1] // 2
     stair_py = stair_position[0] // 2
     stair_x = coordinate_X + cell_rect * (stair_px)
     stair_y = coordinate_Y + cell_rect * (stair_py)
     stair_index = 0
-    # STAIR IS RIGHT
     if (stair_px == maze_size and stair_position[0] > 0 and stair_position[0] < 2 * maze_size):
         stair_index = 1
-        # STAIR IS LEFT
     elif (stair_px == 0 and stair_position[0] > 0 and stair_position[0] < 2 * maze_size):
         stair_index = 3
-        # STAIR IS DOWN
     elif (stair_py == maze_size and stair_position[1] > 0 and stair_position[1] < 2 * maze_size):
         stair_index = 2
     if (stair_index == 0):
@@ -141,23 +133,19 @@ def draw_screen(screen, input_maze, backdrop, floor, maze_size, cell_rect, stair
         stair_x = coordinate_X - stair.cell_w
     stair.draw(screen, stair_x, stair_y, stair_index)
     
-    # DRAW TRAP
     if trap_position:
         trap_x = coordinate_X + cell_rect * (trap_position[1] // 2)
         trap_y = coordinate_Y + cell_rect * (trap_position[0] // 2)
         trap.draw(screen, trap_x, trap_y)
     
-    # DRAW KEY
     if key_position:
         key_x = coordinate_X + cell_rect * (key_position[1] // 2)
         key_y = coordinate_Y + cell_rect * (key_position[0] // 2)
         key.draw(screen, key_x, key_y)
 
-    # DRAW EXPLORER
     if explorer["coordinates"]:
         explorer["sprite_sheet"].draw(screen, explorer["coordinates"][0], explorer["coordinates"][1], explorer["cellIndex"], explorer["direction"])
 
-    # DRAW ENEMIES (Mummy & Scorpion)
     if mummy_white:
         for i in range(len(mummy_white)):
             mummy_white[i]["sprite_sheet"].draw(screen, mummy_white[i]["coordinates"][0], mummy_white[i]["coordinates"][1],
@@ -175,12 +163,8 @@ def draw_screen(screen, input_maze, backdrop, floor, maze_size, cell_rect, stair
             scorpion_red[i]["sprite_sheet"].draw(screen, scorpion_red[i]["coordinates"][0], scorpion_red[i]["coordinates"][1],
                                                 scorpion_red[i]["cellIndex"], scorpion_red[i]["direction"])
 
-    # --- PHẦN CHỈNH SỬA: VISUAL CÁI CỔNG (GATE) ---
-    # ... (Phần trên giữ nguyên)
 
-    # --- SỬA ĐOẠN VẼ GATE (4 CỔNG BAO QUANH) ---
     if gate:
-        # 1. Tính toán toạ độ gốc
         gate_col = gate["gate_position"][1] // 2
         gate_row = gate["gate_position"][0] // 2
         
@@ -194,37 +178,27 @@ def draw_screen(screen, input_maze, backdrop, floor, maze_size, cell_rect, stair
             gate_x -= 3
             gate_y -= 9
 
-        # 2. Lấy hình ảnh hiện tại (Frame) dựa trên animation
-        # Dù đang đóng, mở, hay đang chạy animation thì ta đều lấy đúng frame đó
+
         current_rect_data = gate_sheet.cells[gate["cellIndex"]] 
         gate_img = gate_sheet.sheet.subsurface(pygame.Rect(current_rect_data))
         
         gw = current_rect_data[2]
         gh = current_rect_data[3]
 
-        # 3. Vẽ luôn 4 cạnh (Không cần check isClosed nữa)
-        # Vì khi animation chạy (cổng thụt xuống), hình ảnh gate_img sẽ thay đổi
-        # và cả 4 cạnh sẽ cùng thụt xuống theo.
+
         
-        # --- Cạnh TRÊN (Gốc) ---
         screen.blit(gate_img, (gate_x, gate_y))
         
-        # --- Cạnh DƯỚI ---
         screen.blit(gate_img, (gate_x, gate_y + cell_rect - gh + 12))
 
-        # --- Xoay hình để làm cạnh bên ---
         gate_img_vertical = pygame.transform.rotate(gate_img, 90)
         
-        # --- Cạnh TRÁI ---
         screen.blit(gate_img_vertical, (gate_x, gate_y))
         
-        # --- Cạnh PHẢI ---
         screen.blit(gate_img_vertical, (gate_x + cell_rect - gh + 4, gate_y))
 
-    # -----------------------------------------------
 
-    # DRAW WALL
-    # Horizontal Wall
+ 
     for i in range(2, len(input_maze)-1, 2):
         for j in range(1, len(input_maze[i]), 2):
             if input_maze[i][j] == "%":
@@ -237,7 +211,6 @@ def draw_screen(screen, input_maze, backdrop, floor, maze_size, cell_rect, stair
                     wall_x -= 3
                     wall_y -= 9
                 wall.draw_up_wall(screen, wall_x, wall_y)
-    # Vertical Wall
     for j in range(2, len(input_maze)-1, 2):
         for i in range(1, len(input_maze[j]), 2):
             if input_maze[i][j] == "%":
@@ -299,7 +272,6 @@ def enemy_move_animation(mw_past_position, mw_new_position, mr_past_position, mr
     mr_check_movement = [False for _ in range(len(mr_past_position))]
     sw_check_movement = [False for _ in range(len(sw_past_position))]
     sr_check_movement = [False for _ in range(len(sr_past_position))]
-    # Mummy white
     mummy_white_start_coordinate = []
     for i in range(len(mw_past_position)):
         mummy_white_start_x = game.coordinate_screen_x + game.cell_rect * (mw_past_position[i][1] // 2)
@@ -312,7 +284,6 @@ def enemy_move_animation(mw_past_position, mw_new_position, mr_past_position, mr
         if mw_check_movement[i]:
             mummy_white[i]["direction"] = determine_moving_direction(mw_past_position[i], mw_new_position[i])
 
-    # Mummy red
     mummy_red_start_coordinate = []
     for i in range(len(mr_past_position)):
         mummy_red_start_x = game.coordinate_screen_x + game.cell_rect * (mr_past_position[i][1] // 2)
@@ -338,7 +309,6 @@ def enemy_move_animation(mw_past_position, mw_new_position, mr_past_position, mr
         if sw_check_movement[i]:
             scorpion_white[i]["direction"] = determine_moving_direction(sw_past_position[i], sw_new_position[i])
 
-    # Scorpion Red
     scorpion_red_start_coordinate = []
     for i in range(len(sr_past_position)):
         scorpion_red_start_x = game.coordinate_screen_x + game.cell_rect * (sr_past_position[i][1] // 2)
